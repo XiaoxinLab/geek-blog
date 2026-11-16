@@ -1,5 +1,6 @@
 export default {
   nav: {
+    components: 'Widgets',
     home: 'Home',
     blog: 'Blog',
     music: 'Music',
@@ -90,6 +91,22 @@ export default {
     openSource: 'Open Source',
     mobile: 'Mobile'
   },
+  components: {
+    title: 'Component Showcase',
+    desc: 'Ready-to-use widgets with live previews and complete source code.',
+    back: 'Back to components',
+    copyAll: 'Copy full code',
+    preview: 'Live preview',
+    notFound: 'Component not found',
+    copySuccess: 'Full code copied. Save it as an .html file to run it.',
+    copyFailed: 'Copy failed. Please check the browser clipboard permission.',
+    catBasics: 'Basics',
+    catInteractive: 'Interactive',
+    catData: 'Data Display',
+    catVisual: 'Visual Effects',
+    itemCount: 'items',
+  },
+
   footer: {
     brandDesc: 'Exploring tech boundaries, sharing the geek spirit',
     navigation: 'Navigation',

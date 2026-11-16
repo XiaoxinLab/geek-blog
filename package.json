@@ -1,1 +1,25 @@
-{"name": "geek-blog", "private": true, "version": "1.0.0", "type": "module", "scripts": {"dev": "vite --mode development", "build": "vite build --mode production", "build:dev": "vite build --mode development", "preview": "vite preview"}, "dependencies": {"@vueuse/core": "^10.11.1", "axios": "^1.15.2", "highlight.js": "^11.11.1", "markdown-it": "^14.1.1", "vue": "^3.4.21", "vue-i18n": "^9.14.5", "vue-router": "^4.3.0"}, "devDependencies": {"@vitejs/plugin-vue": "^5.0.4", "vite": "^5.4.2"}}
+{
+    "name": "geek-blog",
+    "private": true,
+    "version": "1.0.0",
+    "type": "module",
+    "scripts": {
+        "dev": "vite --mode development",
+        "build": "vite build --mode production",
+        "build:dev": "vite build --mode development",
+        "preview": "vite preview"
+    },
+    "dependencies": {
+        "@vueuse/core": "^10.11.1",
+        "axios": "^1.15.2",
+        "highlight.js": "^11.11.1",
+        "markdown-it": "^14.1.1",
+        "vue": "^3.4.21",
+        "vue-i18n": "^9.14.5",
+        "vue-router": "^4.3.0"
+    },
+    "devDependencies": {
+        "@vitejs/plugin-vue": "^5.0.4",
+        "vite": "^5.4.2"
+    }
+}

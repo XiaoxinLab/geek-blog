@@ -6,6 +6,8 @@ import About from '../pages/About.vue'
 import Projects from '../pages/Projects.vue'
 import Music from '../pages/Music.vue'
 import MusicPlay from '../pages/MusicPlay.vue'
+import Components from '../pages/Components.vue'
+import ComponentDetail from '../pages/ComponentDetail.vue'
 
 const routes = [
   {
@@ -42,6 +44,16 @@ const routes = [
     path: '/music/play',
     name: 'MusicPlay',
     component: MusicPlay
+  },
+  {
+    path: '/components',
+    name: 'Components',
+    component: Components
+  },
+  {
+    path: '/components/:id',
+    name: 'ComponentDetail',
+    component: ComponentDetail
   }
 ]
 

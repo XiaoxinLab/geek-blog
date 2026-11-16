@@ -255,7 +255,7 @@ const fetchCategories = async () => {
 }
 
 .container-narrow {
-  max-width: 800px;
+  max-width: 960px;
   margin: 0 auto;
   padding: 0 2rem;
 }

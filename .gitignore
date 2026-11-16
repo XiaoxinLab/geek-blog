@@ -5,3 +5,8 @@ dist
 .env.*.local
 *.log
 .DS_Store
+
+# 一次性构建脚本与临时产物
+scripts/
+dist.zip
+test.txt

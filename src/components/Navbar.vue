@@ -74,7 +74,8 @@ const navLinks = [
   { path: '/', labelKey: 'nav.home', prefix: '01.' },
   { path: '/blog', labelKey: 'nav.blog', prefix: '02.' },
   // { path: '/music', labelKey:  'nav.music', prefix: '03.' },
-  { path: '/projects', labelKey: 'nav.projects', prefix: '04.' },
+  { path: '/projects', labelKey: 'nav.projects', prefix: '03.' },
+  { path: '/components', labelKey: 'nav.components', prefix: '04.' },
   { path: '/about', labelKey: 'nav.about', prefix: '05.' }
 ]
 

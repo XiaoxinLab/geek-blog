@@ -1,5 +1,6 @@
 export default {
   nav: {
+    components: '组件',
     home: '首页',
     blog: '博客',
     music: '音乐',
@@ -90,6 +91,22 @@ export default {
     openSource: '开源项目',
     mobile: '移动端'
   },
+  components: {
+    title: '组件展示',
+    desc: '现成的功能组件集合，点击卡片查看代码与完整预览',
+    back: '返回组件列表',
+    copyAll: '复制完整代码',
+    preview: '效果预览',
+    notFound: '没有找到这个组件',
+    copySuccess: '完整代码已复制，可直接保存为 .html 文件',
+    copyFailed: '复制失败，请检查浏览器剪贴板权限',
+    catBasics: '基础元素',
+    catInteractive: '交互反馈',
+    catData: '数据展示',
+    catVisual: '视觉特效',
+    itemCount: '个',
+  },
+
   footer: {
     brandDesc: '探索技术边界，分享极客精神',
     navigation: '导航',
