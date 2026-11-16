@@ -10,3 +10,6 @@ dist
 scripts/
 dist.zip
 test.txt
+
+# 打包好的部署产物
+geek-blog-dist*.zip
