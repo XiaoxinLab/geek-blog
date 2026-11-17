@@ -97,19 +97,27 @@ const idx = computed(() => widgetList.value.findIndex(w => w.id === route.params
 const numLabel = computed(() => String(idx.value + 1).padStart(2, "0"))
 
 /**
- * 拉组件数据：优先用接口，失败就退回本地写死的那份
+ * 拉组件数据
+ * 说明：接口能通就用接口的数据，组件被后台禁用了就显示「没有找到」；
+ *       只有接口调不通时才退回本地写死的那份。
  * @returns {Promise<void>} 加载结束后结束
  */
 async function loadWidget() {
-  const fromApi = await widgetService.getWidget(route.params.id)
-  if (fromApi) {
+  try {
+    const fromApi = await widgetService.getWidget(route.params.id)
     const attached = attachRenderers([fromApi])
-    widgetList.value = attached.length ? attached : fallbackWidgets
-    return
+    // 接口有数据，但前端没有对应的渲染组件（新增的组件还没写渲染器）
+    widgetList.value = attached.length ? attached : []
+  } catch (error) {
+    if (error.notFound) {
+      // 组件被后台禁用了，或者压根没有这个组件，显示「没有找到」
+      widgetList.value = []
+    } else {
+      // 接口调不通，用本地写死的那份兜底，页面还能用
+      console.error('获取组件失败，使用本地数据:', error)
+      widgetList.value = fallbackWidgets
+    }
   }
-
-  console.warn('接口没拿到组件，使用本地数据')
-  widgetList.value = fallbackWidgets
 }
 
 onMounted(loadWidget)

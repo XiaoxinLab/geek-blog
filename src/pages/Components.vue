@@ -11,6 +11,11 @@
 
     <section class="components-content">
       <div class="container">
+        <!-- 一个组件都没有的时候，给个说明，别显示一堆空分类 -->
+        <div v-if="!hasAnyWidget" class="components-empty">
+          {{ t("components.empty") }}
+        </div>
+
         <div
           v-for="(group, key) in groupedWidgets"
           :key="key"
@@ -18,7 +23,7 @@
         >
           <h2 class="category-title">
             <span class="cat-prefix">//</span>
-            <span>{{ t("components." + group.labelKey) }}</span>
+            <span>{{ categoryName(group) }}</span>
             <span class="cat-count">{{ group.items.length }}</span>
           </h2>
           <div class="components-grid">
@@ -95,19 +100,16 @@ const widgetList = ref([])
 const loading = ref(true)
 
 /**
- * 拉组件列表：优先用接口，失败就退回本地写死的那份
+ * 拉组件列表
+ * 说明：接口能通就用接口的数据，哪怕一条都没有（说明后台全禁用了）；
+ *       只有接口调不通时才退回本地写死的那份，别让关掉的组件又冒出来。
  * @returns {Promise<void>} 加载结束后结束
  */
 async function loadWidgets() {
   loading.value = true
   try {
     const fromApi = await widgetService.getWidgets()
-    if (fromApi.length) {
-      widgetList.value = attachRenderers(fromApi)
-    } else {
-      console.warn('接口没返回组件，使用本地数据')
-      widgetList.value = fallbackWidgets
-    }
+    widgetList.value = attachRenderers(fromApi)
   } catch (error) {
     console.error('获取组件失败，使用本地数据:', error)
     widgetList.value = fallbackWidgets
@@ -117,25 +119,51 @@ async function loadWidgets() {
 }
 
 /* ========== 按分类分组 ========== */
+// 预设的分类顺序，只影响展示先后
 const categoryOrder = ["basics", "interactive", "data", "visual"]
+
 /**
- * 按 categoryOrder 顺序把 widgets 分组成 Map-like 对象
- * @returns {object} key 为分类 id, value 为该分类下的 widget 数组
+ * 按分类把组件分组
+ * 说明：只保留有组件的分类，没内容的分类整段不显示，
+ *      这样后台关掉几个组件，前台就少几个分类，跟数据保持一致。
+ * @returns {object} key 为分类 id, value 为该分类下的组件数组
  */
 const groupedWidgets = computed(() => {
   const groups = {}
-  for (const cat of categoryOrder) groups[cat] = []
   for (const w of widgetList.value) {
-    const cat = w.category && groups[w.category] ? w.category : "visual"
+    const cat = w.category || "visual"
+    if (!groups[cat]) groups[cat] = []
     groups[cat].push(w)
   }
+
+  // 预设分类按顺序排在前头，后台新加的分类按字母排在后面
+  const known = categoryOrder.filter((cat) => groups[cat])
+  const extra = Object.keys(groups)
+    .filter((cat) => !categoryOrder.includes(cat))
+    .sort()
+
   const result = {}
-  for (const cat of categoryOrder) {
-    const labelKey = "cat" + cat.charAt(0).toUpperCase() + cat.slice(1)
-    result[cat] = { items: groups[cat], labelKey }
+  for (const cat of [...known, ...extra]) {
+    result[cat] = { items: groups[cat], labelKey: "cat" + cat.charAt(0).toUpperCase() + cat.slice(1) }
   }
   return result
 })
+
+/**
+ * 有没有组件可显示
+ * @returns {boolean} 至少有一个组件返回 true
+ */
+const hasAnyWidget = computed(() => widgetList.value.length > 0)
+
+/**
+ * 分类的中文名
+ * 说明：优先用多语言里的翻译，翻译没有就用分类原文
+ * @param {object} group - 分类信息
+ * @returns {string} 分类显示名
+ */
+function categoryName(group) {
+  return t("components." + group.labelKey, group.labelKey.replace(/^cat/, ""))
+}
 
 onMounted(loadWidgets)
 </script>
@@ -163,6 +191,17 @@ onMounted(loadWidgets)
 .components-content { padding: 2.5rem 0 5rem; }
 
 /* ============ 卡片网格(预览为主) ============ */
+/* ============ 空状态 ============ */
+.components-empty {
+  padding: 4rem 0;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  border: 1px dashed var(--border-color);
+  border-radius: var(--radius-md);
+}
+
 /* ============ 分类小标题 ============ */
 .category-section { margin-bottom: 3rem; }
 .category-section:last-child { margin-bottom: 0; }

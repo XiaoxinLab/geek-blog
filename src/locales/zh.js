@@ -98,6 +98,7 @@ export default {
     copyAll: '复制完整代码',
     preview: '效果预览',
     notFound: '没有找到这个组件',
+    empty: '暂时还没有开放的组件',
     copySuccess: '完整代码已复制，可直接保存为 .html 文件',
     copyFailed: '复制失败，请检查浏览器剪贴板权限',
     catBasics: '基础元素',

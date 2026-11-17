@@ -98,6 +98,7 @@ export default {
     copyAll: 'Copy full code',
     preview: 'Live preview',
     notFound: 'Component not found',
+    empty: 'No components published yet',
     copySuccess: 'Full code copied. Save it as an .html file to run it.',
     copyFailed: 'Copy failed. Please check the browser clipboard permission.',
     catBasics: 'Basics',
