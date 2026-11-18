@@ -2,7 +2,7 @@
  * 组件展示 - 共享数据源
  * Components.vue(列表)与 ComponentDetail.vue(详情)均从此处 import
  */
-import { defineComponent, ref, h, onMounted, onUnmounted } from "vue"
+import { defineComponent, ref, reactive, computed, h, onMounted, onUnmounted } from "vue"
 
 export const ButtonsGroup = () => h("div", { class: "demo-buttons" }, [
   h("button", { class: "btn-demo primary" }, "Primary"),
@@ -1278,6 +1278,234 @@ export const widgets = [
    这张表就是按 widget_key 找到对应渲染组件用的。
    ====================================================== */
 
+/* ======================================================
+   新增的四个组件（渲染器）
+   ====================================================== */
+
+/**
+ * 命令面板：点触发按钮打开，上下键选择，回车执行
+ */
+export const CommandPaletteDemo = defineComponent({
+  setup() {
+    // 预览时默认展开，访客一眼就能看到面板长什么样
+    const open = ref(true)
+    const query = ref('')
+    const active = ref(0)
+
+    const COMMANDS = [
+      { label: '新建文章', hint: 'N' },
+      { label: '打开设置', hint: 'S' },
+      { label: '切换主题', hint: 'T' },
+      { label: '搜索文章', hint: '/' },
+      { label: '查看访问统计', hint: 'V' },
+      { label: '退出登录', hint: 'Q' }
+    ]
+
+    const filtered = computed(() => {
+      const q = query.value.trim().toLowerCase()
+      return q ? COMMANDS.filter((c) => c.label.toLowerCase().includes(q)) : COMMANDS
+    })
+
+    function toggle() {
+      open.value = !open.value
+      query.value = ''
+      active.value = 0
+    }
+
+    function onKey(e) {
+      if (e.key === 'ArrowDown') { e.preventDefault(); active.value = (active.value + 1) % filtered.value.length }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); active.value = (active.value - 1 + filtered.value.length) % filtered.value.length }
+      else if (e.key === 'Escape') { open.value = false }
+    }
+
+    const icon = (d) => h('svg', { width: 15, height: 15, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': 1.8, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, [h('path', { d })])
+
+    return () => h('div', { class: 'cmdk' }, [
+      h('button', { class: 'cmdk-trigger', type: 'button', onClick: toggle }, [
+        icon('M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM20 20l-3.5-3.5'),
+        h('span', null, '搜索命令…'),
+        h('kbd', { class: 'cmdk-kbd' }, 'Ctrl'),
+        h('kbd', { class: 'cmdk-kbd' }, 'K')
+      ]),
+      open.value
+        ? h('div', { class: 'cmdk-overlay', onClick: (e) => { if (e.target === e.currentTarget) open.value = false } }, [
+            h('div', { class: 'cmdk-panel', role: 'dialog', 'aria-modal': 'true' }, [
+              h('div', { class: 'cmdk-search' }, [
+                icon('M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM20 20l-3.5-3.5'),
+                h('input', {
+                  class: 'cmdk-input',
+                  type: 'text',
+                  placeholder: '输入命令，回车执行',
+                  value: query.value,
+                  onInput: (e) => { query.value = e.target.value; active.value = 0 },
+                  onKeydown: onKey
+                }),
+                h('kbd', { class: 'cmdk-kbd' }, 'ESC')
+              ]),
+              h('ul', { class: 'cmdk-list', role: 'listbox' }, filtered.value.map((c, i) =>
+                h('li', {
+                  class: 'cmdk-item',
+                  role: 'option',
+                  'aria-selected': i === active.value ? 'true' : 'false',
+                  'data-active': i === active.value ? 'true' : 'false',
+                  onClick: () => { open.value = false }
+                }, [
+                  h('span', { class: 'cmdk-item-icon' }, [icon('M12 5v14M5 12h14')]),
+                  h('span', { class: 'cmdk-item-label' }, c.label),
+                  h('span', { class: 'cmdk-item-hint' }, c.hint)
+                ])
+              )),
+              h('div', { class: 'cmdk-foot' }, [
+                h('span', null, '↑↓ 选择'),
+                h('span', null, '↵ 执行'),
+                h('span', null, 'esc 关闭')
+              ])
+            ])
+          ])
+        : null
+    ])
+  }
+})
+
+/**
+ * 终端窗口：逐行打出内容
+ */
+export const TerminalWindowDemo = defineComponent({
+  setup() {
+    const LINES = [
+      { text: '$ npm run build', cls: 'term-cmd' },
+      { text: 'vite v5.4.2 building for production...', cls: 'term-dim' },
+      { text: '✓ 22 modules transformed', cls: 'term-ok' },
+      { text: 'dist/assets/     412.08 kB', cls: 'term-dim' },
+      { text: '✓ built in 2.4s', cls: 'term-ok' },
+      { text: '$ ', cls: 'term-cmd' }
+    ]
+
+    const shown = ref(1)
+    const reduce = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    let timer = null
+
+    onMounted(() => {
+      if (reduce) {
+        shown.value = LINES.length
+        return
+      }
+      timer = setInterval(() => {
+        shown.value += 1
+        if (shown.value >= LINES.length) clearInterval(timer)
+      }, 340)
+    })
+
+    onUnmounted(() => {
+      if (timer) clearInterval(timer)
+    })
+
+    return () => h('div', { class: 'term' }, [
+      h('div', { class: 'term-bar' }, [
+        h('span', { class: 'term-dot term-dot-r' }),
+        h('span', { class: 'term-dot term-dot-y' }),
+        h('span', { class: 'term-dot term-dot-g' }),
+        h('span', { class: 'term-title' }, '~/projects/blog — zsh')
+      ]),
+      h('pre', { class: 'term-body' }, [
+        ...LINES.slice(0, shown.value).map((l) => h('span', { class: l.cls }, l.text + '\n')),
+        shown.value >= LINES.length ? h('span', { class: 'term-cursor' }) : null
+      ])
+    ])
+  }
+})
+
+/**
+ * 通知条：点按钮弹出三种状态
+ */
+export const ToastNotifyDemo = defineComponent({
+  setup() {
+    const toast = reactive({ visible: false, type: 'success' })
+    let timer = null
+
+    const PRESET = {
+      success: { title: '保存成功', desc: '文章已经发布到前台', icon: 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM8 12l3 3 5-6' },
+      warning: { title: '还有草稿没写完', desc: '上次编辑是 3 小时前', icon: 'M12 3l9 16H3zM12 9v4M12 17h.01' },
+      error: { title: '上传失败', desc: '图片超过了 2MB，请压缩后再试', icon: 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM9 9l6 6M15 9l-6 6' }
+    }
+
+    function show(type) {
+      toast.type = type
+      toast.visible = true
+      if (timer) clearTimeout(timer)
+      timer = setTimeout(() => { toast.visible = false }, 3200)
+    }
+
+    onUnmounted(() => { if (timer) clearTimeout(timer) })
+
+    const icon = (d) => h('svg', { width: 15, height: 15, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, [h('path', { d })])
+
+    return () => {
+      const preset = PRESET[toast.type]
+      return h('div', { class: 'toast-demo' }, [
+        h('button', { class: 'toast-trigger toast-trigger-ok', type: 'button', onClick: () => show('success') }, [
+          icon('M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM8 12l3 3 5-6'), '成功提示'
+        ]),
+        h('button', { class: 'toast-trigger toast-trigger-warn', type: 'button', onClick: () => show('warning') }, [
+          icon('M12 3l9 16H3zM12 9v4M12 17h.01'), '警告提示'
+        ]),
+        h('button', { class: 'toast-trigger toast-trigger-err', type: 'button', onClick: () => show('error') }, [
+          icon('M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM9 9l6 6M15 9l-6 6'), '错误提示'
+        ]),
+        toast.visible
+          ? h('div', { class: 'toast-stack' }, [
+              h('div', { class: 'toast-item toast-item-' + toast.type, role: 'status' }, [
+                h('span', { class: 'toast-icon' }, [icon(preset.icon)]),
+                h('span', { class: 'toast-body' }, [
+                  h('span', { class: 'toast-title' }, preset.title),
+                  h('span', { class: 'toast-desc' }, preset.desc)
+                ]),
+                h('button', { class: 'toast-close', type: 'button', 'aria-label': '关闭', onClick: () => { toast.visible = false } }, '×')
+              ])
+            ])
+          : null
+      ])
+    }
+  }
+})
+
+/**
+ * 步骤条：点一下往后推
+ */
+export const StepsDemo = defineComponent({
+  setup() {
+    const current = ref(1)
+
+    const STEPS = [
+      { title: '填写内容', desc: '标题和正文都写好了' },
+      { title: '上传封面', desc: '正在处理 2.4 MB 的图片' },
+      { title: '选择分类', desc: '从字典里挑一个' },
+      { title: '发布', desc: '上线后前台就能看到' }
+    ]
+
+    function advance() {
+      current.value = (current.value + 1) % (STEPS.length + 1)
+    }
+
+    return () => h('div', { class: 'steps-demo' }, [
+      h('ol', { class: 'steps' }, STEPS.map((s, i) =>
+        h('li', {
+          class: 'step' + (i < current.value ? ' is-done' : '') + (i === current.value ? ' is-current' : ''),
+          onClick: advance
+        }, [
+          h('span', { class: 'step-mark' }, i < current.value
+            ? h('svg', { width: 13, height: 13, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': 2.4 }, [h('path', { d: 'M5 13l4 4L19 7' })])
+            : String(i + 1)),
+          h('div', { class: 'step-body' }, [
+            h('div', { class: 'step-title' }, s.title),
+            h('div', { class: 'step-desc' }, s.desc)
+          ])
+        ])
+      ))
+    ])
+  }
+})
+
 export const widgetRenderers = {
   buttons: ButtonsGroup,
   badges: BadgesGroup,
@@ -1300,7 +1528,11 @@ export const widgetRenderers = {
   "glitch-text": GlitchTextDemo,
   star: StarRatingDemo,
   range: RangeSliderDemo,
-  cascader: CascaderMenuDemo
+  cascader: CascaderMenuDemo,
+  cmdk: CommandPaletteDemo,
+  terminal: TerminalWindowDemo,
+  toast: ToastNotifyDemo,
+  steps: StepsDemo
 }
 
 /**
