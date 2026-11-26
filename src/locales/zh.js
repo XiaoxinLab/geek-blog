@@ -16,8 +16,8 @@ export default {
     readBlog: '阅读博客',
     learnMore: '了解更多',
     articles: '文章',
-    codeLines: '代码行数',
-    passion: '热情指数',
+    visits: '访问量',
+    widgets: '组件',
     latestPosts: '最新文章',
     viewAll: '查看全部',
     readMore: '阅读全文'

@@ -33,6 +33,26 @@ export const widgetService = {
   },
 
   /**
+   * 获取已启用的组件数量
+   * 说明：跟 getWidgets 用同一个接口，返回数组多长就是多少个。
+   * @returns {Promise<number|null>} 组件数量，接口失败返回 null
+   */
+  async getWidgetCount() {
+    try {
+      const response = await api.get('/widget/public')
+
+      if (response.code === 0 && Array.isArray(response.result)) {
+        return response.result.length
+      }
+
+      return null
+    } catch (error) {
+      console.error('获取组件数量失败:', error)
+      return null
+    }
+  },
+
+  /**
    * 获取单个组件详情
    * 说明：跟 getWidgets 一样，成功返回数据、失败抛错。
    *       组件被后台禁用时接口会返回「没有这个组件」，属于正常情况。

@@ -16,8 +16,8 @@ export default {
     readBlog: 'Read Blog',
     learnMore: 'Learn More',
     articles: 'Articles',
-    codeLines: 'Lines of Code',
-    passion: 'Passion Index',
+    visits: 'Visits',
+    widgets: 'Components',
     latestPosts: 'Latest Posts',
     viewAll: 'View All',
     readMore: 'Read More'

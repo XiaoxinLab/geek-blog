@@ -25,18 +25,18 @@
 
           <div class="hero-stats">
             <div class="stat">
-              <span class="stat-number">47+</span>
+              <span class="stat-number">{{ stats.articles ?? '—' }}</span>
               <span class="stat-label">{{ t('home.articles') }}</span>
             </div>
             <div class="stat-divider"></div>
             <div class="stat">
-              <span class="stat-number">12K+</span>
-              <span class="stat-label">{{ t('home.codeLines') }}</span>
+              <span class="stat-number">{{ stats.visits ?? '—' }}</span>
+              <span class="stat-label">{{ t('home.visits') }}</span>
             </div>
             <div class="stat-divider"></div>
             <div class="stat">
-              <span class="stat-number">99%</span>
-              <span class="stat-label">{{ t('home.passion') }}</span>
+              <span class="stat-number">{{ stats.widgets ?? '—' }}</span>
+              <span class="stat-label">{{ t('home.widgets') }}</span>
             </div>
           </div>
         </div>
@@ -71,11 +71,38 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, reactive, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { latestPosts } from '../data/posts.js'
+import { articleService, visitService } from '../services/articleService.js'
+import { widgetService } from '../services/widgetService.js'
 
 const { t } = useI18n()
+
+/* ========== 首页统计 ========== */
+/** 三个数字全部来自公开接口，null 表示还没取到，页面上显示成横线 */
+const stats = reactive({
+  articles: null,
+  visits: null,
+  widgets: null
+})
+
+/**
+ * 拉取首页三个统计数字
+ * 说明：文章数取 /article/ 的 total，访问量取 /visit/total，
+ *      组件数取 /widget/public 的条数。三个都是后台的真实数据，
+ *      以后发文章、开组件，数字自己就跟着变，不用再手写。
+ * @returns {Promise<void>} 加载结束后结束
+ */
+async function loadStats() {
+  const [articles, visits, widgets] = await Promise.all([
+    articleService.getArticleTotal(),
+    visitService.getTotalVisits(),
+    widgetService.getWidgetCount()
+  ])
+  stats.articles = articles
+  stats.visits = visits
+  stats.widgets = widgets
+}
 
 const typedText = ref('')
 const titles = computed(() => [
@@ -108,7 +135,10 @@ function typeEffect() {
   }
 }
 
-onMounted(() => typeEffect())
+onMounted(() => {
+  typeEffect()
+  loadStats()
+})
 onUnmounted(() => clearTimeout(timer))
 </script>
 
