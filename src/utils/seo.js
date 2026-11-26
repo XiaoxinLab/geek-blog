@@ -9,7 +9,9 @@ const SITE_NAME = 'QiSui.BLOG'
 const SITE_URL = 'https://qisui.asia'
 const DEFAULT_DESCRIPTION =
   '七岁的前端技术笔记，记录 Vue、React、TypeScript、Node.js 等技术栈的实践与踩坑。'
-const DEFAULT_IMAGE = SITE_URL + '/images/image.png'
+const DEFAULT_IMAGE = SITE_URL + '/images/og-cover.jpg'
+// twitter 用 webp，同一张图小一半
+const DEFAULT_TWITTER_IMAGE = SITE_URL + '/images/og-cover.webp'
 
 /**
  * 找到或者创建一个 meta 标签
@@ -79,7 +81,7 @@ export function setPageMeta(options = {}) {
   setMeta('twitter:card', 'summary_large_image')
   setMeta('twitter:title', title ? `${title} · ${SITE_NAME}` : SITE_NAME)
   setMeta('twitter:description', description)
-  setMeta('twitter:image', image)
+  setMeta('twitter:image', options.image ? image : DEFAULT_TWITTER_IMAGE)
 
   // canonical 告诉搜索引擎哪个地址是正版
   let canonical = document.head.querySelector('link[rel="canonical"]')
@@ -92,4 +94,4 @@ export function setPageMeta(options = {}) {
   canonical.setAttribute('data-page', url)
 }
 
-export { SITE_NAME, SITE_URL, DEFAULT_DESCRIPTION, DEFAULT_IMAGE }
+export { SITE_NAME, SITE_URL, DEFAULT_DESCRIPTION, DEFAULT_IMAGE, DEFAULT_TWITTER_IMAGE }

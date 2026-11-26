@@ -1,20 +1,16 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import Home from '../pages/Home.vue'
-import Blog from '../pages/Blog.vue'
-import ArticleDetail from '../pages/ArticleDetail.vue'
-import About from '../pages/About.vue'
-import Projects from '../pages/Projects.vue'
-import Music from '../pages/Music.vue'
-import MusicPlay from '../pages/MusicPlay.vue'
-import Components from '../pages/Components.vue'
-import ComponentDetail from '../pages/ComponentDetail.vue'
 import { setPageMeta } from '../utils/seo'
+
+// 页面都改成按需加载：
+// 说明：之前是把所有页面 import 进来，首屏要下载整个站点的代码（1.4MB）。
+//       改成动态 import 之后，Vite 会给每个页面单独打包，
+//       打开首页只下载首页用到的那部分。
 
 const routes = [
   {
     path: '/',
     name: 'Home',
-    component: Home,
+    component: () => import('../pages/Home.vue'),
     meta: {
       title: '首页',
       description: '七岁的技术博客，记录前端、后端与工程实践。'
@@ -23,7 +19,7 @@ const routes = [
   {
     path: '/blog',
     name: 'Blog',
-    component: Blog,
+    component: () => import('../pages/Blog.vue'),
     meta: {
       title: '博客',
       description: '全部文章列表，记录 Vue、React、TypeScript、Node.js 等技术栈的实践与踩坑。'
@@ -32,14 +28,14 @@ const routes = [
   {
     path: '/blog/:id',
     name: 'ArticleDetail',
-    component: ArticleDetail,
+    component: () => import('../pages/ArticleDetail.vue'),
     // 文章页的标题和封面要等文章数据回来才知道，在页面里单独更新
     meta: { title: '文章' }
   },
   {
     path: '/about',
     name: 'About',
-    component: About,
+    component: () => import('../pages/About.vue'),
     meta: {
       title: '关于',
       description: '关于七岁，以及这个博客是怎么来的。'
@@ -48,7 +44,7 @@ const routes = [
   {
     path: '/projects',
     name: 'Projects',
-    component: Projects,
+    component: () => import('../pages/Projects.vue'),
     meta: {
       title: '项目',
       description: '七岁做过的一些项目，涵盖前端、后端与运维。'
@@ -57,7 +53,7 @@ const routes = [
   {
     path: '/music',
     name: 'Music',
-    component: Music,
+    component: () => import('../pages/Music.vue'),
     meta: {
       title: '音乐',
       description: '听点东西。'
@@ -66,13 +62,13 @@ const routes = [
   {
     path: '/music/play',
     name: 'MusicPlay',
-    component: MusicPlay,
+    component: () => import('../pages/MusicPlay.vue'),
     meta: { title: '播放' }
   },
   {
     path: '/components',
     name: 'Components',
-    component: Components,
+    component: () => import('../pages/Components.vue'),
     meta: {
       title: '组件',
       description: '现成的功能组件集合，点击卡片查看代码与完整预览。'
@@ -81,7 +77,7 @@ const routes = [
   {
     path: '/components/:id',
     name: 'ComponentDetail',
-    component: ComponentDetail,
+    component: () => import('../pages/ComponentDetail.vue'),
     // 组件页的标题等拿到组件数据再更新
     meta: { title: '组件' }
   }

@@ -113,7 +113,7 @@
 
 <script setup>
 import { useI18n } from 'vue-i18n'
-import avatarImg from '../images/avatar.jpg'
+import avatarImg from '../images/avatar.webp'
 import WeChatPopover from '../components/WeChatPopover.vue'
 
 const { t } = useI18n()
