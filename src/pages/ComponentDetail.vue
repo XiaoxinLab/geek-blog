@@ -75,6 +75,7 @@ import jsLang from "highlight.js/lib/languages/javascript"
 import { widgets as fallbackWidgets, attachRenderers } from "../data/widgets.js"
 import { widgetService } from "../services/widgetService.js"
 import { copyText } from "../utils/clipboard.js"
+import { setPageMeta } from "../utils/seo"
 
 // 只注册我们用得到的语言,控制打包体积
 hljs.registerLanguage("html", htmlLang)
@@ -108,6 +109,13 @@ async function loadWidget() {
     const attached = attachRenderers([fromApi])
     // 接口有数据，但前端没有对应的渲染组件（新增的组件还没写渲染器）
     widgetList.value = attached.length ? attached : []
+
+    // 分享出去的卡片要用这个组件真实的标题和说明
+    setPageMeta({
+      title: fromApi.title,
+      description: fromApi.desc || '',
+      url: location.origin + route.path
+    })
   } catch (error) {
     if (error.notFound) {
       // 组件被后台禁用了，或者压根没有这个组件，显示「没有找到」

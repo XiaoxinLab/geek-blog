@@ -64,6 +64,7 @@ import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { articleService } from '../services/articleService.js'
 import { renderMarkdown } from '../utils/markdown.js'
+import { setPageMeta } from '../utils/seo.js'
 
 const { t } = useI18n()
 const route = useRoute()
@@ -123,6 +124,19 @@ const fetchArticle = async () => {
     
     if (response && response.id) {
       article.value = response
+
+      // 分享出去的卡片要用这篇文章真实的标题、摘要和封面
+      setPageMeta({
+        title: response.title,
+        description: (response.excerpt || response.content || '')
+          .replace(/[#>*_`~\[\]()]/g, ' ')
+          .replace(/\s+/g, ' ')
+          .trim()
+          .slice(0, 150),
+        image: response.cover || response.image || response.img,
+        url: location.origin + route.path,
+        type: 'article'
+      })
 
       if (response.file_url && !response.content) {
         const apiBase = import.meta.env.VITE_API_BASE_URL || 'http://localhost:1011'

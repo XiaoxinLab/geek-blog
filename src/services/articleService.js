@@ -29,6 +29,27 @@ export const articleService = {
     }
   },
 
+  /**
+   * 获取文章总数
+   * 说明：列表接口的 result.total 就是总数，不用把文章全拉回来数。
+   *      只取一条，够拿 total 了。
+   * @returns {Promise<number|null>} 文章总数，接口失败返回 null
+   */
+  async getArticleTotal() {
+    try {
+      const response = await api.get('/article/', { params: { pageNum: 1, pageSize: 1 } })
+
+      if (response.code === 0 && response.result) {
+        return Number(response.result.total || 0)
+      }
+
+      return null
+    } catch (error) {
+      console.error('获取文章总数失败:', error)
+      return null
+    }
+  },
+
   // 获取单个文章详情
   async getArticleById(id) {
     try {
@@ -117,12 +138,16 @@ export const articleService = {
   
   // 转换单个文章数据格式（后端字段 -> 前端字段）
   transformArticle(article) {
+    // 正文两个字段名都可能，先归一
+    const content = article.content || article.article_content || ''
+    const excerpt = content
+      ? content.replace(/[#>*_`~\[\]()]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 150)
+      : '暂无摘要'
+
     return {
       id: article.id,
       title: article.article_title || article.title || '未命名文章',
-      excerpt: article.content?.substring(0, 150) + '...' || 
-               article.article_content?.substring(0, 150) + '...' ||
-               '暂无摘要',
+      excerpt,
       category: article.article_classification || article.category || '未分类',
       date: article.createdAt || 
             article.created_at || 
@@ -130,6 +155,8 @@ export const articleService = {
             new Date().toISOString().split('T')[0],
       author: article.article_author || article.author || '七岁',
       content: article.content || article.article_content || '',
+      // 封面图，分享卡片用
+      cover: article.article_img || article.cover || article.image || '',
       file_url: article.article_file_url || ''
     }
   },
@@ -276,10 +303,12 @@ export const visitService = {
   async getTotalVisits() {
     try {
       const response = await api.get('/visit/total')
-      return response.result?.totalVisits || 0
+      return Number(response.result?.totalVisits || 0)
     } catch (error) {
       console.error('获取总访问量失败:', error)
-      throw error
+      // 拿不到就返回 null，调用方显示横线，
+      // 别显示成 0，那会被误读成「今天没人来过」
+      return null
     }
   }
 }
